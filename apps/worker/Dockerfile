@@ -22,11 +22,11 @@ WORKDIR /app
 ENV NODE_ENV=production
 RUN apk add --no-cache openssl && addgroup -S nodejs && adduser -S worker -G nodejs
 
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/packages ./packages
-COPY --from=builder /app/apps/worker/src ./apps/worker/src
-COPY --from=builder /app/apps/worker/tsconfig.json ./apps/worker/tsconfig.json
-COPY --from=builder /app/apps/worker/package.json ./apps/worker/package.json
+COPY --from=builder --chown=worker:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=worker:nodejs /app/packages ./packages
+COPY --from=builder --chown=worker:nodejs /app/apps/worker/src ./apps/worker/src
+COPY --from=builder --chown=worker:nodejs /app/apps/worker/tsconfig.json ./apps/worker/tsconfig.json
+COPY --from=builder --chown=worker:nodejs /app/apps/worker/package.json ./apps/worker/package.json
 
 USER worker
 CMD ["npx", "tsx", "apps/worker/src/index.ts"]
