@@ -20,15 +20,17 @@ RUN npm run build:web
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-RUN apk add --no-cache openssl && addgroup -S nodejs && adduser -S nextjs -G nodejs
+RUN apk add --no-cache openssl su-exec && addgroup -S nodejs && adduser -S nextjs -G nodejs
 
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/.next/static
+COPY apps/web/docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
 
-USER nextjs
 EXPOSE 3000
 ENV PORT=3000
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
 CMD ["node", "apps/web/server.js"]

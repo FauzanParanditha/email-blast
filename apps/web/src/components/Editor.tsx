@@ -33,12 +33,20 @@ export function Editor({
   });
 
   async function handleImageUpload(file: File) {
-    const formData = new FormData();
-    formData.append("file", file);
-    const res = await fetch("/api/upload/image", { method: "POST", body: formData });
-    const data = await res.json();
-    if (res.ok && data.url) {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload/image", { method: "POST", body: formData });
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        alert(data.error || `Failed to upload image (${res.status})`);
+        return;
+      }
+
       editor?.chain().focus().setImage({ src: data.url }).run();
+    } catch {
+      alert("Failed to upload image: network or server error");
     }
   }
 

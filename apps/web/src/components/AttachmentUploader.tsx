@@ -22,41 +22,49 @@ export function AttachmentUploader({
     setUploading(true);
     setError(null);
 
-    const formData = new FormData();
-    formData.append("file", file);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
 
-    const res = await fetch(`/api/campaigns/${campaignId}/attachments`, {
-      method: "POST",
-      body: formData,
-    });
-    const data = await res.json();
+      const res = await fetch(`/api/campaigns/${campaignId}/attachments`, {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json().catch(() => ({}));
 
-    setUploading(false);
+      if (!res.ok) {
+        setError(data.error || `Failed to upload attachment (${res.status})`);
+        return;
+      }
 
-    if (!res.ok) {
-      setError(data.error || "Failed to upload attachment");
-      return;
+      setAttachments(data.attachments);
+    } catch {
+      setError("Failed to upload attachment: network or server error");
+    } finally {
+      setUploading(false);
     }
-
-    setAttachments(data.attachments);
   }
 
   async function handleRemove(url: string) {
     setError(null);
 
-    const res = await fetch(`/api/campaigns/${campaignId}/attachments`, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url }),
-    });
-    const data = await res.json();
+    try {
+      const res = await fetch(`/api/campaigns/${campaignId}/attachments`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      const data = await res.json().catch(() => ({}));
 
-    if (!res.ok) {
-      setError(data.error || "Failed to remove attachment");
-      return;
+      if (!res.ok) {
+        setError(data.error || `Failed to remove attachment (${res.status})`);
+        return;
+      }
+
+      setAttachments(data.attachments);
+    } catch {
+      setError("Failed to remove attachment: network or server error");
     }
-
-    setAttachments(data.attachments);
   }
 
   return (

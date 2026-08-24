@@ -30,23 +30,27 @@ export function ImportUploader({ campaignId }: { campaignId: string }) {
     setError(null);
     setInsertedCount(null);
 
-    const formData = new FormData();
-    formData.append("file", file);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
 
-    const res = await fetch(`/api/campaigns/${campaignId}/recipients/import/preview`, {
-      method: "POST",
-      body: formData,
-    });
-    const data = await res.json();
+      const res = await fetch(`/api/campaigns/${campaignId}/recipients/import/preview`, {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json().catch(() => ({}));
 
-    setLoading(false);
+      if (!res.ok) {
+        setError(data.error || `Failed to preview file (${res.status})`);
+        return;
+      }
 
-    if (!res.ok) {
-      setError(data.error || "Failed to preview file");
-      return;
+      setPreview(data);
+    } catch {
+      setError("Failed to preview file: network or server error");
+    } finally {
+      setLoading(false);
     }
-
-    setPreview(data);
   }
 
   async function handleConfirm() {
@@ -54,24 +58,28 @@ export function ImportUploader({ campaignId }: { campaignId: string }) {
     setLoading(true);
     setError(null);
 
-    const res = await fetch(`/api/campaigns/${campaignId}/recipients/import/confirm`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ rows: preview.validRows }),
-    });
-    const data = await res.json();
+    try {
+      const res = await fetch(`/api/campaigns/${campaignId}/recipients/import/confirm`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rows: preview.validRows }),
+      });
+      const data = await res.json().catch(() => ({}));
 
-    setLoading(false);
+      if (!res.ok) {
+        setError(data.error || `Failed to import recipients (${res.status})`);
+        return;
+      }
 
-    if (!res.ok) {
-      setError(data.error || "Failed to import recipients");
-      return;
+      setInsertedCount(data.insertedCount);
+      setPreview(null);
+      setFile(null);
+      router.refresh();
+    } catch {
+      setError("Failed to import recipients: network or server error");
+    } finally {
+      setLoading(false);
     }
-
-    setInsertedCount(data.insertedCount);
-    setPreview(null);
-    setFile(null);
-    router.refresh();
   }
 
   return (

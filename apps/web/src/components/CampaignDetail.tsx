@@ -36,21 +36,25 @@ export function CampaignDetail({
     setError(null);
     setMessage(null);
 
-    const res = await fetch(`/api/campaigns/${campaign.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ subject, bodyHtml }),
-    });
-    const data = await res.json();
+    try {
+      const res = await fetch(`/api/campaigns/${campaign.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subject, bodyHtml }),
+      });
+      const data = await res.json().catch(() => ({}));
 
-    setSaving(false);
+      if (!res.ok) {
+        setError(data.error || `Failed to save campaign (${res.status})`);
+        return;
+      }
 
-    if (!res.ok) {
-      setError(data.error || "Failed to save campaign");
-      return;
+      setMessage("Saved.");
+    } catch {
+      setError("Failed to save campaign: network or server error");
+    } finally {
+      setSaving(false);
     }
-
-    setMessage("Saved.");
   }
 
   async function handleSend() {
@@ -59,17 +63,21 @@ export function CampaignDetail({
     setSending(true);
     setError(null);
 
-    const res = await fetch(`/api/campaigns/${campaign.id}/send`, { method: "POST" });
-    const data = await res.json();
+    try {
+      const res = await fetch(`/api/campaigns/${campaign.id}/send`, { method: "POST" });
+      const data = await res.json().catch(() => ({}));
 
-    setSending(false);
+      if (!res.ok) {
+        setError(data.error || `Failed to send campaign (${res.status})`);
+        return;
+      }
 
-    if (!res.ok) {
-      setError(data.error || "Failed to send campaign");
-      return;
+      router.push(`/campaigns/${campaign.id}/monitor`);
+    } catch {
+      setError("Failed to send campaign: network or server error");
+    } finally {
+      setSending(false);
     }
-
-    router.push(`/campaigns/${campaign.id}/monitor`);
   }
 
   return (
