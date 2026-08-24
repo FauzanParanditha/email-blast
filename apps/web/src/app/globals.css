@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.tiptap-editor .ProseMirror {
+  min-height: 260px;
+  outline: none;
+}
+
+.tiptap-editor table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.tiptap-editor td,
+.tiptap-editor th {
+  border: 1px solid #cbd5e1;
+  padding: 6px 8px;
+}
+
+.tiptap-editor img {
+  max-width: 100%;
+}

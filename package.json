@@ -1,0 +1,23 @@
+{
+  "name": "email-blast-dashboard",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev -w apps/web",
+    "dev:worker": "npm run dev -w apps/worker",
+    "build:web": "npm run build -w apps/web",
+    "db:generate": "npm run generate -w packages/db",
+    "db:migrate": "npm run migrate:dev -w packages/db",
+    "db:studio": "npm run studio -w packages/db"
+  },
+  "allowScripts": {
+    "@prisma/client@5.22.0": true,
+    "@prisma/engines@5.22.0": true,
+    "esbuild@0.28.2": true,
+    "msgpackr-extract@3.0.4": true,
+    "prisma@5.22.0": true
+  }
+}
