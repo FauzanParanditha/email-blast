@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@email-blast/db";
 import { ImportUploader } from "@/components/ImportUploader";
 
+export const dynamic = "force-dynamic";
 export default async function ImportPage({ params }: { params: { id: string } }) {
   const campaign = await prisma.campaign.findUnique({ where: { id: params.id } });
 

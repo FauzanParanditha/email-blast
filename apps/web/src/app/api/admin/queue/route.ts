@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { emailQueue } from "@/lib/queue";
 
+export const dynamic = "force-dynamic";
 export async function GET() {
   const counts = await emailQueue.getJobCounts(
     "waiting",

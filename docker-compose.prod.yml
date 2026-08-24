@@ -1,0 +1,87 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-emailblast}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-emailblast}
+      POSTGRES_DB: ${POSTGRES_DB:-emailblast}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-emailblast}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      target: builder
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-emailblast}:${POSTGRES_PASSWORD:-emailblast}@postgres:5432/${POSTGRES_DB:-emailblast}?schema=public
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["npx", "prisma", "migrate", "deploy", "--schema", "packages/db/prisma/schema.prisma"]
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-emailblast}:${POSTGRES_PASSWORD:-emailblast}@postgres:5432/${POSTGRES_DB:-emailblast}?schema=public
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    volumes:
+      - web_uploads:/app/apps/web/public/uploads
+
+  worker:
+    build:
+      context: .
+      dockerfile: apps/worker/Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-emailblast}:${POSTGRES_PASSWORD:-emailblast}@postgres:5432/${POSTGRES_DB:-emailblast}?schema=public
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      APP_INTERNAL_URL: http://web:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+      web:
+        condition: service_started
+
+volumes:
+  postgres_data:
+  redis_data:
+  web_uploads:

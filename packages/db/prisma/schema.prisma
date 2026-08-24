@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -20,13 +21,14 @@ enum RecipientStatus {
 }
 
 model Campaign {
-  id         String          @id @default(cuid())
-  subject    String
-  bodyHtml   String
-  status     CampaignStatus  @default(DRAFT)
-  createdAt  DateTime        @default(now())
-  sentAt     DateTime?
-  recipients Recipient[]
+  id          String          @id @default(cuid())
+  subject     String
+  bodyHtml    String
+  status      CampaignStatus  @default(DRAFT)
+  attachments Json            @default("[]")
+  createdAt   DateTime        @default(now())
+  sentAt      DateTime?
+  recipients  Recipient[]
 }
 
 model Recipient {
@@ -41,4 +43,5 @@ model Recipient {
   updatedAt    DateTime        @updatedAt
 
   @@index([campaignId, status])
+  @@unique([campaignId, email])
 }

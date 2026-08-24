@@ -1,5 +1,10 @@
 export const EMAIL_QUEUE_NAME = "email-send";
 
+export interface CampaignAttachment {
+  url: string;
+  filename: string;
+}
+
 export interface EmailJobData {
   recipientId: string;
   campaignId: string;
@@ -7,6 +12,7 @@ export interface EmailJobData {
   name: string | null;
   subject: string;
   bodyHtml: string;
+  attachments: CampaignAttachment[];
 }
 
 export function getRedisConnectionOptions() {

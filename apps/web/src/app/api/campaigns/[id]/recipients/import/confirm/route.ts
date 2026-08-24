@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@email-blast/db";
 import { isValidEmail } from "@/lib/validateEmail";
 
+export const dynamic = "force-dynamic";
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const campaign = await prisma.campaign.findUnique({ where: { id: params.id } });
 

@@ -28,12 +28,13 @@ async function markCampaignSentIfDone(campaignId: string) {
 }
 
 async function processor(job: Job<EmailJobData>) {
-  const { recipientId, email, name, subject, bodyHtml } = job.data;
+  const { recipientId, email, name, subject, bodyHtml, attachments } = job.data;
 
   await sendCampaignEmail({
     to: email,
     subject,
     html: personalize(bodyHtml, name),
+    attachments,
   });
 
   await prisma.recipient.update({

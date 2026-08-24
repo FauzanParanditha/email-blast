@@ -1,18 +1,23 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 type InvalidRow = { row: number; email: string; reason: string };
+type AlreadyImportedRow = { row: number; email: string };
 type ValidRow = { email: string; name: string | null };
 
 type PreviewResult = {
   validCount: number;
   invalidCount: number;
+  alreadyImportedCount: number;
   validRows: ValidRow[];
   invalidRows: InvalidRow[];
+  alreadyImportedRows: AlreadyImportedRow[];
 };
 
 export function ImportUploader({ campaignId }: { campaignId: string }) {
+  const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<PreviewResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -66,6 +71,7 @@ export function ImportUploader({ campaignId }: { campaignId: string }) {
     setInsertedCount(data.insertedCount);
     setPreview(null);
     setFile(null);
+    router.refresh();
   }
 
   return (
@@ -104,7 +110,17 @@ export function ImportUploader({ campaignId }: { campaignId: string }) {
           <div className="flex gap-6 text-sm">
             <span className="text-green-700">Valid rows: {preview.validCount}</span>
             <span className="text-red-700">Invalid rows: {preview.invalidCount}</span>
+            <span className="text-slate-500">
+              Already imported: {preview.alreadyImportedCount}
+            </span>
           </div>
+
+          {preview.alreadyImportedRows.length > 0 && (
+            <p className="text-xs text-slate-500">
+              Skipped (already in this campaign):{" "}
+              {preview.alreadyImportedRows.map((row) => row.email).join(", ")}
+            </p>
+          )}
 
           {preview.invalidRows.length > 0 && (
             <div className="max-h-48 overflow-y-auto rounded border">

@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@email-blast/db";
 import { emailQueue, JOB_ATTEMPTS, JOB_BACKOFF_DELAY_MS } from "@/lib/queue";
 import { sanitizeCampaignBody } from "@/lib/sanitize";
-import type { EmailJobData } from "@email-blast/queue";
+import type { CampaignAttachment, EmailJobData } from "@email-blast/queue";
 
+export const dynamic = "force-dynamic";
 export async function POST(_req: NextRequest, { params }: { params: { id: string } }) {
   const campaign = await prisma.campaign.findUnique({ where: { id: params.id } });
 
@@ -31,6 +32,9 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
   }
 
   const bodyHtml = sanitizeCampaignBody(campaign.bodyHtml);
+  const attachments = Array.isArray(campaign.attachments)
+    ? (campaign.attachments as unknown as CampaignAttachment[])
+    : [];
 
   await prisma.campaign.update({
     where: { id: campaign.id },
@@ -47,6 +51,7 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
         name: recipient.name,
         subject: campaign.subject,
         bodyHtml,
+        attachments,
       } satisfies EmailJobData,
       opts: {
         jobId: `campaign-${campaign.id}-recipient-${recipient.id}`,

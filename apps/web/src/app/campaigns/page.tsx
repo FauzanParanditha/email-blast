@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@email-blast/db";
 
+export const dynamic = "force-dynamic";
 export default async function CampaignsPage() {
   const campaigns = await prisma.campaign.findMany({
     orderBy: { createdAt: "desc" },

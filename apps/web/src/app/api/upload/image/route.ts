@@ -3,6 +3,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
 const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 const MAX_SIZE_BYTES = 5 * 1024 * 1024;
 

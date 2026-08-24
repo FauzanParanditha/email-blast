@@ -4,12 +4,14 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Editor } from "./Editor";
+import { AttachmentUploader } from "./AttachmentUploader";
 
 type Campaign = {
   id: string;
   subject: string;
   bodyHtml: string;
   status: "DRAFT" | "SENDING" | "SENT";
+  attachments: { url: string; filename: string }[];
 };
 
 export function CampaignDetail({
@@ -107,6 +109,12 @@ export function CampaignDetail({
           />
         )}
       </div>
+
+      <AttachmentUploader
+        campaignId={campaign.id}
+        initialAttachments={campaign.attachments}
+        disabled={!isDraft}
+      />
 
       {error && <p className="text-sm text-red-600">{error}</p>}
       {message && <p className="text-sm text-green-700">{message}</p>}

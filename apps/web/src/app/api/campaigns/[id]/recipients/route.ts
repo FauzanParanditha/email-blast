@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@email-blast/db";
 
+export const dynamic = "force-dynamic";
 const PAGE_SIZE = 50;
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
