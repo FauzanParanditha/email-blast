@@ -47,7 +47,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   await writeFile(path.join(UPLOAD_DIR, storedName), buffer);
 
   const attachment: CampaignAttachment = {
-    url: `/uploads/attachments/${storedName}`,
+    url: `/api/files/attachments/${storedName}`,
     filename: file.name,
   };
 

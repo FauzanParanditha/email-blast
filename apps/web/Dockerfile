@@ -30,7 +30,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/
 COPY apps/web/docker-entrypoint.sh /app/docker-entrypoint.sh
 RUN chmod +x /app/docker-entrypoint.sh
 
+WORKDIR /app/apps/web
 EXPOSE 3000
 ENV PORT=3000
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
-CMD ["node", "apps/web/server.js"]
+CMD ["node", "server.js"]
